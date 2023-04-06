@@ -3,6 +3,7 @@
 const express = require("express");
 const { NotFoundError } = require("./expressError");
 const companiesRoutes = require("./routes/companies");
+const invoicesRoutes = require("./routes/invoices");
 
 const app = express();
 
@@ -10,6 +11,9 @@ app.use(express.json());
 
 /** Handle all requests to "/companies" */
 app.use("/companies", companiesRoutes);
+
+/** Handle all requests to "/invoices" */
+app.use("/invoices", invoicesRoutes);
 
 
 
