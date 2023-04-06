@@ -8,6 +8,7 @@ const app = express();
 
 app.use(express.json());
 
+/** Handle all requests to "/companies" */
 app.use("/companies", companiesRoutes);
 
 
