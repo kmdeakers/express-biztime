@@ -22,28 +22,37 @@ router.get("/", async function (req, res) {
   return res.json({ companies });
 });
 
-/**Get company by code:  {company: {code, name, description}}. 
+/**Get company by code:  {company: {code, name, description, invoices: [id, ...]}}. 
  * Return 404 error if not found
 */
 router.get("/:code", async function (req, res) {
   const code = req.params.code;
-  const result = await db.query(
+  const cResult = await db.query(
     `SELECT code, name, description
             FROM companies
             WHERE code = $1`,
     [code]
   );
+  
+  const company = cResult.rows[0];
 
-  const company = result.rows[0];
-  ///TODO supply error message
   if (company === undefined) throw new NotFoundError();
+
+  const iResult = await db.query(
+    `SELECT id FROM invoices
+            WHERE comp_code=$1`,
+            [code]
+  ); 
+
+  const invoices = iResults.rows.map(r => r.id);
+  company.invoices = invoices;
+
   return res.json({ company });
 });
 
 /** Add new company to db. Takes JSON: {code, name, description}. Return JSON : {company: {code, name, description}}
  * Return 400 error if no body or incomplete data is sent
 */
-///TODO add request data to doc string
 
 router.post("/", async function (req, res) {
   if (!req.body) throw new BadRequestError();
@@ -63,7 +72,6 @@ router.post("/", async function (req, res) {
   const company = result.rows[0];
   return res.status(201).json({ company });
 });
-
 
 /**Edit existing company data. Take JSON: {name, description}. Return JSON: {company: {code, name, description}}
  * Return 400 error if no body or incomplete data is sent. Return 404 if 
@@ -102,7 +110,6 @@ router.delete("/:code", async function (req, res) {
             RETURNING code`,
     [req.params.code],
   );
-
 
   const company = result.rows[0];
 
